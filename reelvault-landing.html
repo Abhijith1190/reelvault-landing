@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReelVault — Never lose a saved video again</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0a;
+  --surface:#111111;
+  --surface2:#1a1a1a;
+  --border:#222222;
+  --accent:#6C63FF;
+  --accent2:#FF6B6B;
+  --accent3:#00D9A5;
+  --text:#f0ede8;
+  --muted:#666660;
+  --subtle:#333330;
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+  overflow-x:hidden;
+}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.25rem 2.5rem;
+  border-bottom:1px solid var(--border);
+  background:rgba(10,10,10,0.85);
+  backdrop-filter:blur(12px);
+}
+.nav-logo{
+  font-family:'Syne',sans-serif;
+  font-weight:800;font-size:1.25rem;
+  display:flex;align-items:center;gap:0.6rem;
+}
+.logo-icon{
+  width:32px;height:32px;border-radius:8px;
+  background:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+}
+.logo-icon svg{width:18px;height:18px;fill:white}
+.nav-cta{
+  background:var(--accent);color:white;
+  padding:0.5rem 1.25rem;border-radius:6px;
+  font-size:0.875rem;font-weight:500;
+  text-decoration:none;
+  transition:opacity 0.2s;
+}
+.nav-cta:hover{opacity:0.85}
+
+/* HERO */
+.hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;
+  padding:8rem 2rem 4rem;
+  position:relative;
+  overflow:hidden;
+}
+.hero-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(var(--border) 1px,transparent 1px),
+    linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:60px 60px;
+  opacity:0.4;
+  mask-image:radial-gradient(ellipse 80% 60% at 50% 50%,black 30%,transparent 100%);
+}
+.hero-glow{
+  position:absolute;
+  width:600px;height:600px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(108,99,255,0.15) 0%,transparent 70%);
+  top:50%;left:50%;transform:translate(-50%,-60%);
+  pointer-events:none;
+}
+.badge{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:100px;
+  padding:0.4rem 1rem;
+  font-size:0.8rem;color:var(--muted);
+  margin-bottom:2rem;
+  position:relative;z-index:1;
+}
+.badge-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--accent3);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+h1{
+  font-family:'Syne',sans-serif;
+  font-weight:800;
+  font-size:clamp(2.5rem,7vw,5.5rem);
+  line-height:1.05;
+  letter-spacing:-0.02em;
+  margin-bottom:1.5rem;
+  position:relative;z-index:1;
+}
+h1 .line2{color:var(--accent)}
+h1 .line3{
+  -webkit-text-stroke:1px rgba(240,237,232,0.3);
+  color:transparent;
+}
+.hero-sub{
+  font-size:clamp(1rem,2vw,1.2rem);
+  color:var(--muted);
+  max-width:560px;
+  margin:0 auto 3rem;
+  font-weight:300;
+  position:relative;z-index:1;
+  line-height:1.7;
+}
+.hero-sub strong{color:var(--text);font-weight:500}
+.hero-actions{
+  display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;
+  position:relative;z-index:1;
+  margin-bottom:4rem;
+}
+.btn-primary{
+  background:var(--accent);color:white;
+  padding:0.875rem 2rem;border-radius:8px;
+  font-size:1rem;font-weight:500;
+  text-decoration:none;
+  transition:transform 0.2s,opacity 0.2s;
+  display:flex;align-items:center;gap:0.5rem;
+}
+.btn-primary:hover{transform:translateY(-2px);opacity:0.9}
+.btn-secondary{
+  background:transparent;color:var(--text);
+  padding:0.875rem 2rem;border-radius:8px;
+  font-size:1rem;font-weight:400;
+  text-decoration:none;border:1px solid var(--border);
+  transition:border-color 0.2s,background 0.2s;
+}
+.btn-secondary:hover{border-color:var(--muted);background:var(--surface)}
+
+/* PHONE MOCKUP */
+.phone-wrap{
+  position:relative;z-index:1;
+  display:inline-block;
+}
+.phone{
+  width:280px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:36px;
+  overflow:hidden;
+  box-shadow:0 40px 80px rgba(0,0,0,0.6);
+  position:relative;
+}
+.phone::before{
+  content:'';
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:80px;height:28px;
+  background:var(--bg);
+  border-radius:0 0 16px 16px;
+  z-index:10;
+}
+.phone-screen{padding:40px 16px 20px}
+.phone-appbar{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;
+}
+.phone-appbar .app-title{
+  font-family:'Syne',sans-serif;
+  font-weight:700;font-size:1rem;
+}
+.phone-appbar .icons{display:flex;gap:8px}
+.phone-appbar .icon-btn{
+  width:28px;height:28px;border-radius:6px;
+  background:var(--surface2);
+  display:flex;align-items:center;justify-content:center;
+}
+.phone-appbar .icon-btn svg{width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2}
+.chip-row{display:flex;gap:6px;margin-bottom:16px;overflow:hidden}
+.chip{
+  padding:4px 12px;border-radius:100px;font-size:11px;
+  white-space:nowrap;
+}
+.chip.active{background:var(--accent);color:white}
+.chip.idle{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+.card-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.vcard{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:12px;
+  overflow:hidden;
+}
+.vcard-thumb{
+  height:72px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;
+  position:relative;
+  overflow:hidden;
+}
+.vcard-body{padding:8px}
+.vcard-platform{
+  font-size:9px;font-weight:600;
+  padding:2px 6px;border-radius:4px;
+  display:inline-block;margin-bottom:4px;
+}
+.yt{background:rgba(255,0,0,0.15);color:#ff6b6b}
+.ig{background:rgba(225,48,108,0.15);color:#e1306c}
+.tt{background:rgba(105,201,208,0.15);color:#69c9d0}
+.vcard-title{font-size:10px;color:var(--text);line-height:1.3;font-weight:400}
+.vcard-tag{
+  margin-top:4px;
+  font-size:9px;color:var(--accent);
+  background:rgba(108,99,255,0.1);
+  padding:2px 6px;border-radius:4px;
+  display:inline-block;
+}
+.phone-fab{
+  position:absolute;bottom:20px;right:16px;
+  width:40px;height:40px;border-radius:12px;
+  background:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 12px rgba(108,99,255,0.4);
+}
+.phone-fab svg{width:18px;height:18px;stroke:white;fill:none;stroke-width:2.5}
+
+/* PROBLEM SECTION */
+.section{padding:5rem 2rem;max-width:1100px;margin:0 auto}
+.section-label{
+  font-size:0.75rem;font-weight:500;letter-spacing:0.1em;
+  color:var(--accent);text-transform:uppercase;
+  margin-bottom:1rem;
+}
+.section-title{
+  font-family:'Syne',sans-serif;
+  font-weight:700;
+  font-size:clamp(1.8rem,4vw,3rem);
+  line-height:1.15;
+  margin-bottom:1rem;
+}
+.section-sub{
+  font-size:1.05rem;color:var(--muted);
+  max-width:520px;font-weight:300;line-height:1.7;
+}
+
+/* PROBLEM CARDS */
+.problem-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:1px;
+  background:var(--border);
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+  margin-top:3rem;
+}
+.problem-card{
+  background:var(--bg);
+  padding:2rem 1.5rem;
+}
+.problem-num{
+  font-family:'Syne',sans-serif;
+  font-size:2.5rem;font-weight:800;
+  color:var(--subtle);
+  margin-bottom:0.75rem;
+  line-height:1;
+}
+.problem-title{
+  font-size:1rem;font-weight:500;
+  margin-bottom:0.5rem;
+}
+.problem-desc{font-size:0.875rem;color:var(--muted);line-height:1.6}
+
+/* HOW IT WORKS */
+.how-wrap{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:3rem;
+  margin-top:3rem;
+}
+.steps{display:flex;flex-direction:column;gap:0}
+.step{
+  display:grid;
+  grid-template-columns:48px 1fr;
+  gap:1.5rem;
+  padding:1.5rem 0;
+  border-bottom:1px solid var(--border);
+}
+.step:last-child{border-bottom:none;padding-bottom:0}
+.step:first-child{padding-top:0}
+.step-num{
+  width:48px;height:48px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;
+  font-weight:700;font-size:1.1rem;
+  color:var(--accent);
+  flex-shrink:0;
+}
+.step-title{font-size:1rem;font-weight:500;margin-bottom:0.25rem}
+.step-desc{font-size:0.875rem;color:var(--muted);line-height:1.6}
+.step-tag{
+  display:inline-block;margin-top:0.5rem;
+  font-size:0.75rem;padding:3px 10px;border-radius:100px;
+  background:rgba(108,99,255,0.1);color:var(--accent);
+}
+
+/* FEATURES */
+.features-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.5rem;
+  margin-top:3rem;
+}
+.feature-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:1.75rem;
+  transition:border-color 0.2s;
+}
+.feature-card:hover{border-color:var(--accent)}
+.feature-icon{
+  width:44px;height:44px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:1rem;
+  font-size:1.3rem;
+}
+.feature-title{font-size:1rem;font-weight:500;margin-bottom:0.5rem}
+.feature-desc{font-size:0.875rem;color:var(--muted);line-height:1.6}
+
+/* SEARCH DEMO */
+.search-demo{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:2.5rem;
+  margin-top:3rem;
+}
+.search-bar{
+  display:flex;align-items:center;gap:0.75rem;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:0.875rem 1.25rem;
+  margin-bottom:1.5rem;
+}
+.search-bar svg{width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2;flex-shrink:0}
+.search-text{color:var(--text);font-size:0.95rem}
+.search-cursor{
+  display:inline-block;width:2px;height:16px;
+  background:var(--accent);margin-left:2px;
+  animation:blink 1s infinite;vertical-align:middle;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.results{display:flex;flex-direction:column;gap:0.75rem}
+.result-item{
+  display:flex;align-items:center;gap:1rem;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:0.875rem 1rem;
+}
+.result-thumb{
+  width:48px;height:48px;border-radius:8px;
+  background:var(--subtle);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;flex-shrink:0;
+}
+.result-info{flex:1}
+.result-title{font-size:0.875rem;font-weight:500;margin-bottom:0.2rem}
+.result-meta{font-size:0.75rem;color:var(--muted)}
+.result-score{
+  font-size:0.75rem;font-weight:500;
+  padding:3px 8px;border-radius:100px;
+  background:rgba(0,217,165,0.1);color:var(--accent3);
+  flex-shrink:0;
+}
+
+/* PLATFORMS */
+.platforms{
+  display:flex;gap:1rem;flex-wrap:wrap;
+  justify-content:center;
+  margin-top:2.5rem;
+}
+.platform-pill{
+  display:flex;align-items:center;gap:0.6rem;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:100px;
+  padding:0.6rem 1.25rem;
+  font-size:0.875rem;
+}
+.platform-dot{width:8px;height:8px;border-radius:50%}
+
+/* WAITLIST */
+.waitlist-wrap{
+  max-width:500px;margin:0 auto;
+  text-align:center;
+  padding:5rem 2rem;
+}
+.waitlist-wrap h2{
+  font-family:'Syne',sans-serif;
+  font-weight:800;
+  font-size:clamp(2rem,5vw,3.5rem);
+  line-height:1.1;
+  margin-bottom:1rem;
+}
+.waitlist-wrap p{
+  color:var(--muted);margin-bottom:2rem;
+  font-weight:300;line-height:1.7;
+}
+.email-form{
+  display:flex;gap:0;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;
+  overflow:hidden;
+  margin-bottom:0.75rem;
+}
+.email-input{
+  flex:1;background:transparent;border:none;
+  padding:0.875rem 1.25rem;
+  color:var(--text);font-size:0.95rem;font-family:'DM Sans',sans-serif;
+  outline:none;
+}
+.email-input::placeholder{color:var(--muted)}
+.email-submit{
+  background:var(--accent);color:white;border:none;
+  padding:0.875rem 1.5rem;font-size:0.9rem;font-weight:500;
+  cursor:pointer;font-family:'DM Sans',sans-serif;
+  transition:opacity 0.2s;white-space:nowrap;
+}
+.email-submit:hover{opacity:0.85}
+.form-note{font-size:0.75rem;color:var(--muted)}
+
+/* SOCIAL PROOF */
+.quote-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:1.5rem;
+  margin-top:3rem;
+}
+.quote-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:1.5rem;
+}
+.quote-text{
+  font-size:0.9rem;color:var(--text);
+  line-height:1.7;margin-bottom:1rem;
+  font-style:italic;font-weight:300;
+}
+.quote-text::before{content:'\201C';font-size:1.5rem;color:var(--accent);line-height:0;vertical-align:-0.4rem;margin-right:0.1rem}
+.quote-author{display:flex;align-items:center;gap:0.75rem}
+.quote-avatar{
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.75rem;font-weight:600;
+}
+.quote-name{font-size:0.8rem;font-weight:500}
+.quote-handle{font-size:0.75rem;color:var(--muted)}
+
+/* FOOTER */
+footer{
+  border-top:1px solid var(--border);
+  padding:2rem;
+  text-align:center;
+  color:var(--muted);
+  font-size:0.8rem;
+}
+footer a{color:var(--muted);text-decoration:none}
+footer a:hover{color:var(--text)}
+
+/* DIVIDER */
+.divider{
+  width:100%;height:1px;
+  background:var(--border);
+}
+
+/* ANIMATIONS */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(24px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.hero > *{
+  animation:fadeUp 0.6s ease forwards;
+  opacity:0;
+}
+.badge{animation-delay:0.1s}
+h1{animation-delay:0.2s}
+.hero-sub{animation-delay:0.3s}
+.hero-actions{animation-delay:0.4s}
+.phone-wrap{animation-delay:0.5s}
+
+/* SCROLL REVEAL */
+.reveal{
+  opacity:0;
+  transform:translateY(20px);
+  transition:opacity 0.6s ease,transform 0.6s ease;
+}
+.reveal.visible{opacity:1;transform:none}
+
+@media(max-width:640px){
+  nav{padding:1rem 1.25rem}
+  .how-wrap{padding:1.5rem}
+  .search-demo{padding:1.5rem}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zM9 8l6 4-6 4V8z"/></svg>
+    </div>
+    ReelVault
+  </div>
+  <a href="#waitlist" class="nav-cta">Join waitlist</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+
+  <div class="badge">
+    <span class="badge-dot"></span>
+    Now in development — join the waitlist
+  </div>
+
+  <h1>
+    You save videos.<br>
+    <span class="line2">You never find them.</span><br>
+    <span class="line3">Until now.</span>
+  </h1>
+
+  <p class="hero-sub">
+    ReelVault is an <strong>AI-powered vault</strong> for your saved Instagram Reels, TikToks, and YouTube Shorts.
+    Share any video directly into ReelVault — AI auto-categorizes, tags, and makes it <strong>searchable forever</strong>.
+  </p>
+
+  <div class="hero-actions">
+    <a href="#waitlist" class="btn-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+      Join the waitlist
+    </a>
+    <a href="#how-it-works" class="btn-secondary">See how it works</a>
+  </div>
+
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="phone-screen">
+        <div class="phone-appbar">
+          <span class="app-title">ReelVault</span>
+          <div class="icons">
+            <div class="icon-btn">
+              <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="chip-row">
+          <span class="chip active">All</span>
+          <span class="chip idle">Travel</span>
+          <span class="chip idle">Food</span>
+          <span class="chip idle">Fitness</span>
+        </div>
+        <div class="card-grid">
+          <div class="vcard">
+            <div class="vcard-thumb" style="background:#1a0a0a">🏖️</div>
+            <div class="vcard-body">
+              <span class="vcard-platform ig">Instagram</span>
+              <div class="vcard-title">Bali hidden beaches guide</div>
+              <span class="vcard-tag">Travel</span>
+            </div>
+          </div>
+          <div class="vcard">
+            <div class="vcard-thumb" style="background:#0a1a0a">🍜</div>
+            <div class="vcard-body">
+              <span class="vcard-platform yt">YouTube</span>
+              <div class="vcard-title">Butter chicken in 20 min</div>
+              <span class="vcard-tag">Food</span>
+            </div>
+          </div>
+          <div class="vcard">
+            <div class="vcard-thumb" style="background:#0a0a1a">💪</div>
+            <div class="vcard-body">
+              <span class="vcard-platform tt">TikTok</span>
+              <div class="vcard-title">10-min home workout</div>
+              <span class="vcard-tag">Fitness</span>
+            </div>
+          </div>
+          <div class="vcard">
+            <div class="vcard-thumb" style="background:#1a1a0a">💡</div>
+            <div class="vcard-body">
+              <span class="vcard-platform yt">YouTube</span>
+              <div class="vcard-title">Startup idea validation</div>
+              <span class="vcard-tag">Business</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-fab">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PROBLEM -->
+<div class="section reveal">
+  <div class="section-label">The problem</div>
+  <h2 class="section-title">Your saves folder is a<br>digital graveyard</h2>
+  <p class="section-sub">You've saved hundreds of videos across three apps. You'll never find any of them again. Sound familiar?</p>
+
+  <div class="problem-grid">
+    <div class="problem-card">
+      <div class="problem-num">500+</div>
+      <div class="problem-title">Videos saved, never watched again</div>
+      <div class="problem-desc">The average person has hundreds of saved videos they've completely forgotten about.</div>
+    </div>
+    <div class="problem-card">
+      <div class="problem-num">3 apps</div>
+      <div class="problem-title">Split across Instagram, TikTok, YouTube</div>
+      <div class="problem-desc">Your saves are scattered. No single place to find that recipe you saved last Tuesday.</div>
+    </div>
+    <div class="problem-card">
+      <div class="problem-num">0%</div>
+      <div class="problem-title">Search inside native save folders</div>
+      <div class="problem-desc">You can't search your saves on any platform. Scroll and pray is the only strategy.</div>
+    </div>
+    <div class="problem-card">
+      <div class="problem-num">∞</div>
+      <div class="problem-title">Time wasted re-finding the same videos</div>
+      <div class="problem-desc">You've definitely opened TikTok 3 times to find that one recipe you can't remember saving.</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- HOW IT WORKS -->
+<div class="section reveal" id="how-it-works">
+  <div class="section-label">How it works</div>
+  <h2 class="section-title">Share once.<br>Find forever.</h2>
+  <p class="section-sub">Three taps is all it takes. ReelVault handles everything else automatically.</p>
+
+  <div class="how-wrap">
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div>
+          <div class="step-title">Share any video to ReelVault</div>
+          <div class="step-desc">Tap Share on any Instagram Reel, TikTok, or YouTube Short. Select ReelVault from the share sheet. That's it — no copy-pasting URLs.</div>
+          <span class="step-tag">Android + iOS</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div>
+          <div class="step-title">Give it a quick label</div>
+          <div class="step-desc">Type what the video is about in one line — "Bali travel vlog", "butter chicken recipe", "home workout no equipment". Takes 5 seconds.</div>
+          <span class="step-tag">5 seconds</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div>
+          <div class="step-title">AI does the rest</div>
+          <div class="step-desc">ReelVault automatically assigns a category, generates tags, writes a summary, and creates a semantic embedding — all in under 30 seconds.</div>
+          <span class="step-tag">Llama 3.1 + pgvector</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div>
+          <div class="step-title">Search naturally, find instantly</div>
+          <div class="step-desc">Type "that Bali video from last month" or "chicken recipe under 30 minutes" — semantic search understands what you mean, not just what you type.</div>
+          <span class="step-tag">Semantic search</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- SEARCH DEMO -->
+<div class="section reveal">
+  <div class="section-label">Semantic search</div>
+  <h2 class="section-title">It understands what<br>you actually mean</h2>
+  <p class="section-sub">Forget exact keywords. ReelVault understands meaning — just describe what you remember.</p>
+
+  <div class="search-demo">
+    <div class="search-bar">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <span class="search-text">budget trip south east asia beaches<span class="search-cursor"></span></span>
+    </div>
+    <div class="results">
+      <div class="result-item">
+        <div class="result-thumb">🏖️</div>
+        <div class="result-info">
+          <div class="result-title">Bali hidden beaches guide</div>
+          <div class="result-meta">Travel · Instagram · saved 2 days ago</div>
+        </div>
+        <span class="result-score">91% match</span>
+      </div>
+      <div class="result-item">
+        <div class="result-thumb">🛵</div>
+        <div class="result-info">
+          <div class="result-title">$500 Bali itinerary — 7 days</div>
+          <div class="result-meta">Travel · YouTube · saved last week</div>
+        </div>
+        <span class="result-score">87% match</span>
+      </div>
+      <div class="result-item">
+        <div class="result-thumb">🌴</div>
+        <div class="result-info">
+          <div class="result-title">Thailand island hopping guide</div>
+          <div class="result-meta">Travel · TikTok · saved 3 weeks ago</div>
+        </div>
+        <span class="result-score">79% match</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- FEATURES -->
+<div class="section reveal">
+  <div class="section-label">Features</div>
+  <h2 class="section-title">Everything your saves<br>folder should be</h2>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(108,99,255,0.1)">🔍</div>
+      <div class="feature-title">Semantic search</div>
+      <div class="feature-desc">Search by meaning, not keywords. "That pasta recipe" finds it even if you never typed "pasta".</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(0,217,165,0.1)">🤖</div>
+      <div class="feature-title">Auto-categorization</div>
+      <div class="feature-desc">AI reads the video context and assigns Travel, Food, Fitness, Business, and more — automatically.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(255,107,107,0.1)">📱</div>
+      <div class="feature-title">Native share integration</div>
+      <div class="feature-desc">Share directly from Instagram, TikTok, and YouTube. ReelVault appears in your phone's share sheet.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(108,99,255,0.1)">🏷️</div>
+      <div class="feature-title">Smart tags</div>
+      <div class="feature-desc">AI generates 2–5 specific tags per video. Filter and browse your vault by any tag instantly.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(0,217,165,0.1)">✍️</div>
+      <div class="feature-title">AI summaries</div>
+      <div class="feature-desc">Never watch a video to remember what it was about. Each save gets a one-sentence summary.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(255,107,107,0.1)">🔒</div>
+      <div class="feature-title">Yours forever</div>
+      <div class="feature-desc">Your vault is private and yours. Even if a platform removes the video, your summary and tags remain.</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- PLATFORMS -->
+<div class="section reveal" style="text-align:center">
+  <div class="section-label" style="text-align:center">Works with</div>
+  <h2 class="section-title" style="text-align:center">Every platform<br>you already use</h2>
+  <div class="platforms">
+    <div class="platform-pill">
+      <span class="platform-dot" style="background:#E1306C"></span>
+      Instagram Reels
+    </div>
+    <div class="platform-pill">
+      <span class="platform-dot" style="background:#69C9D0"></span>
+      TikTok
+    </div>
+    <div class="platform-pill">
+      <span class="platform-dot" style="background:#FF0000"></span>
+      YouTube Shorts
+    </div>
+    <div class="platform-pill">
+      <span class="platform-dot" style="background:#666"></span>
+      Any URL
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- SOCIAL PROOF -->
+<div class="section reveal">
+  <div class="section-label">Early feedback</div>
+  <h2 class="section-title">People are already<br>excited</h2>
+  <div class="quote-grid">
+    <div class="quote-card">
+      <div class="quote-text">I have literally 800 saved reels on Instagram and I can't find a single one when I need it. This is exactly what I've been waiting for.</div>
+      <div class="quote-author">
+        <div class="quote-avatar" style="background:rgba(108,99,255,0.15);color:#6C63FF">SK</div>
+        <div>
+          <div class="quote-name">Sneha K.</div>
+          <div class="quote-handle">Product designer</div>
+        </div>
+      </div>
+    </div>
+    <div class="quote-card">
+      <div class="quote-text">The AI search is genuinely mind-blowing. I typed "that noodle thing I saved" and it found exactly the right video. How?!</div>
+      <div class="quote-author">
+        <div class="quote-avatar" style="background:rgba(0,217,165,0.15);color:#00D9A5">MR</div>
+        <div>
+          <div class="quote-name">Marcus R.</div>
+          <div class="quote-handle">Food blogger</div>
+        </div>
+      </div>
+    </div>
+    <div class="quote-card">
+      <div class="quote-text">I save travel content obsessively and can never find it when I'm actually planning a trip. ReelVault solves a real problem.</div>
+      <div class="quote-author">
+        <div class="quote-avatar" style="background:rgba(255,107,107,0.15);color:#FF6B6B">AP</div>
+        <div>
+          <div class="quote-name">Aisha P.</div>
+          <div class="quote-handle">Travel creator</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- WAITLIST -->
+<div id="waitlist" class="waitlist-wrap reveal">
+  <div class="section-label" style="text-align:center">Early access</div>
+  <h2>Get early access to ReelVault</h2>
+  <p>We're opening up to the first 500 users. Join the waitlist and be the first to know when we launch on Android and iOS.</p>
+  <div class="email-form">
+    <input type="email" class="email-input" placeholder="your@email.com" id="emailInput">
+    <button class="email-submit" onclick="handleSubmit()">Join waitlist →</button>
+  </div>
+  <div class="form-note" id="formNote">No spam. Just a launch notification when we're ready.</div>
+</div>
+
+<footer>
+  <p>Built with ❤️ — ReelVault is in active development · <a href="#">Privacy</a> · <a href="#">Twitter/X</a></p>
+</footer>
+
+<script>
+function handleSubmit(){
+  const email=document.getElementById('emailInput').value;
+  const note=document.getElementById('formNote');
+  if(!email||!email.includes('@')){
+    note.style.color='#FF6B6B';
+    note.textContent='Please enter a valid email address.';
+    return;
+  }
+  note.style.color='#00D9A5';
+  note.textContent='✓ You\'re on the list! We\'ll reach out when we launch.';
+  document.getElementById('emailInput').value='';
+  document.querySelector('.email-submit').textContent='You\'re in!';
+  document.querySelector('.email-submit').style.background='#00D9A5';
+}
+
+const observer=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('visible');
+    }
+  });
+},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const target=document.querySelector(a.getAttribute('href'));
+    if(target){e.preventDefault();target.scrollIntoView({behavior:'smooth'})}
+  });
+});
+</script>
+</body>
+</html>
